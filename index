@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cuaderno de Análisis — Acciones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E1116; --panel:#161B22; --panel2:#1C222C; --border:#2A303B;
+  --ink:#E8E6DF; --ink-dim:#9BA3AF; --gold:#C9A24B; --green:#4C9A6A; --red:#B5533C;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){ --bg:#0E1116; --panel:#161B22; --panel2:#1C222C; --ink:#E8E6DF; }
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'IBM Plex Sans', system-ui, sans-serif; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px; margin:0 auto; padding:48px 20px 80px;}
+header{margin-bottom:44px;}
+.kicker{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--gold); letter-spacing:.02em; margin:0 0 10px;}
+h1{font-family:'Spectral',serif; font-weight:600; font-size:2.1rem; margin:0 0 12px; color:var(--ink); line-height:1.2;}
+.lede{color:var(--ink-dim); font-size:1.02rem; max-width:62ch; margin:0;}
+nav.toc{display:flex; flex-wrap:wrap; gap:8px 18px; margin:28px 0 0; padding-top:20px; border-top:1px solid var(--border);}
+nav.toc a{color:var(--ink-dim); text-decoration:none; font-size:.88rem; border-bottom:1px dotted var(--border); padding-bottom:2px;}
+nav.toc a:hover{color:var(--gold); border-color:var(--gold);}
+
+section{margin-bottom:56px; scroll-margin-top:24px;}
+h2{font-family:'Spectral',serif; font-weight:600; font-size:1.35rem; margin:0 0 6px; color:var(--ink);}
+.sub{color:var(--ink-dim); font-size:.92rem; margin:0 0 20px; max-width:60ch;}
+
+.card{background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:22px 22px 24px;}
+.grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px 16px;}
+@media(max-width:520px){.grid{grid-template-columns:1fr;}}
+label{display:block; font-size:.82rem; color:var(--ink-dim); margin-bottom:5px;}
+input[type=number]{
+  width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--ink);
+  font-family:'IBM Plex Mono',monospace; font-size:.95rem; padding:9px 10px; border-radius:4px;
+}
+input[type=number]:focus{outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold);}
+.results{margin-top:22px; border-top:1px solid var(--border); padding-top:18px;}
+.row{display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-bottom:1px dashed var(--border); gap:12px;}
+.row:last-child{border-bottom:none;}
+.row .name{font-size:.88rem; color:var(--ink-dim);}
+.row .val{font-family:'IBM Plex Mono',monospace; font-size:1rem; text-align:right;}
+.tag{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; padding:2px 7px; border-radius:3px; margin-left:8px; vertical-align:1px;}
+.tag.good{background:rgba(76,154,106,.16); color:var(--green);}
+.tag.warn{background:rgba(201,162,75,.16); color:var(--gold);}
+.tag.bad{background:rgba(181,83,60,.16); color:var(--red);}
+.note{color:var(--ink-dim); font-size:.82rem; margin-top:16px; line-height:1.5;}
+
+.check-list{display:flex; flex-direction:column; gap:10px;}
+.check{display:flex; gap:12px; align-items:flex-start; padding:12px; border:1px solid var(--border); border-radius:5px; background:var(--panel2); cursor:pointer;}
+.check input{margin-top:3px; accent-color:var(--gold);}
+.check .txt strong{display:block; font-size:.92rem; margin-bottom:2px;}
+.check .txt span{font-size:.8rem; color:var(--ink-dim);}
+.score-bar{margin-top:18px;}
+.score-track{height:8px; background:var(--panel2); border-radius:4px; overflow:hidden; border:1px solid var(--border);}
+.score-fill{height:100%; background:var(--gold); width:0%; transition:width .3s ease;}
+.score-label{display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:.8rem; color:var(--ink-dim); margin-top:6px;}
+
+.cmp-table{width:100%; border-collapse:collapse; margin-bottom:20px;}
+.cmp-table th, .cmp-table td{padding:8px 6px; text-align:center; vertical-align:middle;}
+.cmp-table th{font-size:.72rem; color:var(--ink-dim); font-weight:500;}
+.cmp-table td input{text-align:center; padding:7px 4px; font-size:.85rem;}
+.cmp-table td:first-child, .cmp-table th:first-child{text-align:left;}
+.cmp-out{width:100%; border-collapse:collapse; margin-top:6px;}
+.cmp-out th{font-size:.75rem; color:var(--ink-dim); font-weight:500; text-align:center; padding:8px 6px; border-bottom:1px solid var(--border);}
+.cmp-out th:first-child{text-align:left;}
+.cmp-out td{font-family:'IBM Plex Mono',monospace; font-size:.9rem; text-align:center; padding:9px 6px; border-bottom:1px dashed var(--border);}
+.cmp-out td:first-child{font-family:'IBM Plex Sans',sans-serif; text-align:left; color:var(--ink-dim); font-size:.82rem;}
+.cmp-out td.best{color:var(--green); position:relative;}
+.sens-table{width:100%; border-collapse:collapse; margin-top:4px; font-family:'IBM Plex Mono',monospace; font-size:.82rem;}
+.sens-table th, .sens-table td{padding:8px 6px; text-align:center; border-bottom:1px dashed var(--border);}
+.sens-table th{color:var(--ink-dim); font-weight:500; font-size:.74rem;}
+.sens-table td.center{background:rgba(201,162,75,.14); color:var(--gold); font-weight:500;}
+.sens-table td.above{color:var(--green);}
+.sens-table td.below{color:var(--red);}
+.scroll-x{overflow-x:auto;}
+
+.gloss{border:1px solid var(--border); border-radius:5px; overflow:hidden;}
+.g-item{border-bottom:1px solid var(--border);}
+.g-item:last-child{border-bottom:none;}
+.g-item summary{cursor:pointer; padding:13px 16px; font-size:.92rem; list-style:none; display:flex; justify-content:space-between; align-items:center; background:var(--panel2);}
+.g-item summary::-webkit-details-marker{display:none;}
+.g-item summary::after{content:'+'; font-family:'IBM Plex Mono',monospace; color:var(--gold);}
+.g-item[open] summary::after{content:'–';}
+.g-item p{margin:0; padding:14px 16px 16px; color:var(--ink-dim); font-size:.88rem; max-width:64ch;}
+
+footer{border-top:1px solid var(--border); padding-top:20px; color:var(--ink-dim); font-size:.78rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">CUADERNO DE ANÁLISIS · ACCIONES</p>
+  <h1>Un lugar para pensar en voz alta sobre una acción</h1>
+  <p class="lede">Cargá los números de la empresa que estás mirando y esta página hace el cálculo: ratios, valuación por DCF y un scorecard de calidad. No trae datos de mercado en vivo — los buscás vos en el balance o en un screener y los tipeás acá. Eso es parte del ejercicio.</p>
+  <nav class="toc">
+    <a href="#ratios">Ratios</a>
+    <a href="#compare">Comparador</a>
+    <a href="#dcf">DCF</a>
+    <a href="#sensitivity">Sensibilidad</a>
+    <a href="#score">Scorecard de calidad</a>
+    <a href="#gloss">Glosario</a>
+  </nav>
+</header>
+
+<section id="ratios">
+  <h2>1. Ratios fundamentales</h2>
+  <p class="sub">Metés precio y estados contables básicos, la página calcula los múltiplos y los ratios de solvencia/rentabilidad más usados y te dice si están en zona cómoda, de atención o de alerta.</p>
+  <div class="card">
+    <div class="grid">
+      <div><label for="price">Precio de la acción</label><input type="number" id="price" step="0.01" placeholder="ej. 185.40"></div>
+      <div><label for="eps">Ganancia por acción (EPS)</label><input type="number" id="eps" step="0.01" placeholder="ej. 6.10"></div>
+      <div><label for="bvps">Valor libro por acción</label><input type="number" id="bvps" step="0.01" placeholder="ej. 4.20"></div>
+      <div><label for="ni">Ingreso neto (millones)</label><input type="number" id="ni" step="0.01" placeholder="ej. 96000"></div>
+      <div><label for="eq">Patrimonio neto (millones)</label><input type="number" id="eq" step="0.01" placeholder="ej. 65000"></div>
+      <div><label for="debt">Deuda total (millones)</label><input type="number" id="debt" step="0.01" placeholder="ej. 105000"></div>
+      <div><label for="ca">Activo corriente (millones)</label><input type="number" id="ca" step="0.01" placeholder="ej. 30000"></div>
+      <div><label for="cl">Pasivo corriente (millones)</label><input type="number" id="cl" step="0.01" placeholder="ej. 28000"></div>
+      <div><label for="fcf">Flujo de caja libre (millones)</label><input type="number" id="fcf" step="0.01" placeholder="ej. 90000"></div>
+      <div><label for="mktcap">Capitalización de mercado (millones)</label><input type="number" id="mktcap" step="0.01" placeholder="ej. 2800000"></div>
+    </div>
+    <div class="results" id="ratioResults"></div>
+    <p class="note">Las zonas (cómodo / atención / alerta) son referencias generales de manual, no reglas fijas — un ratio "alto" puede ser normal según la industria. Siempre compará contra 2–3 competidores directos, nunca en el vacío.</p>
+  </div>
+</section>
+
+<section id="compare">
+  <h2>2. Comparador de empresas</h2>
+  <p class="sub">Nunca mires un ratio solo — compará contra 2–3 competidores directos de la misma industria. Cargá hasta tres empresas y la fila con mejor valor se resalta en verde.</p>
+  <div class="card">
+    <div class="scroll-x">
+      <table class="cmp-table">
+        <thead><tr><th>Empresa</th><th><input type="text" id="c1name" placeholder="Empresa A"></th><th><input type="text" id="c2name" placeholder="Empresa B"></th><th><input type="text" id="c3name" placeholder="Empresa C"></th></tr></thead>
+        <tbody>
+          <tr><td>Precio</td><td><input type="number" step="0.01" id="c1price"></td><td><input type="number" step="0.01" id="c2price"></td><td><input type="number" step="0.01" id="c3price"></td></tr>
+          <tr><td>EPS</td><td><input type="number" step="0.01" id="c1eps"></td><td><input type="number" step="0.01" id="c2eps"></td><td><input type="number" step="0.01" id="c3eps"></td></tr>
+          <tr><td>Valor libro/acción</td><td><input type="number" step="0.01" id="c1bvps"></td><td><input type="number" step="0.01" id="c2bvps"></td><td><input type="number" step="0.01" id="c3bvps"></td></tr>
+          <tr><td>ROE (%)</td><td><input type="number" step="0.01" id="c1roe"></td><td><input type="number" step="0.01" id="c2roe"></td><td><input type="number" step="0.01" id="c3roe"></td></tr>
+          <tr><td>Deuda/Patrimonio</td><td><input type="number" step="0.01" id="c1de"></td><td><input type="number" step="0.01" id="c2de"></td><td><input type="number" step="0.01" id="c3de"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll-x"><table class="cmp-out" id="cmpOut"></table></div>
+    <p class="note">Verde = mejor valor de esa fila entre las empresas cargadas (P/E y P/B más bajos, ROE más alto, Deuda/Patrimonio más bajo). No implica que sea "la mejor acción" — solo el mejor número en ese ratio puntual.</p>
+  </div>
+</section>
+
+<section id="dcf">
+  <h2>3. Valuación por flujo de caja descontado (DCF)</h2>
+  <p class="sub">Una estimación simplificada a 5 años: proyectás el flujo de caja libre actual, le aplicás una tasa de crecimiento y una tasa de descuento, y obtenés un valor intrínseco por acción para comparar contra el precio de mercado.</p>
+  <div class="card">
+    <div class="grid">
+      <div><label for="dfcf">FCF actual (millones)</label><input type="number" id="dfcf" step="0.01" placeholder="ej. 90000"></div>
+      <div><label for="dshares">Acciones en circulación (millones)</label><input type="number" id="dshares" step="0.01" placeholder="ej. 15200"></div>
+      <div><label for="dgrowth">Crecimiento anual esperado (%)</label><input type="number" id="dgrowth" step="0.1" placeholder="ej. 8"></div>
+      <div><label for="dterm">Crecimiento terminal (%)</label><input type="number" id="dterm" step="0.1" placeholder="ej. 2.5"></div>
+      <div><label for="ddisc">Tasa de descuento / WACC (%)</label><input type="number" id="ddisc" step="0.1" placeholder="ej. 9"></div>
+      <div><label for="dprice">Precio actual de la acción</label><input type="number" id="dprice" step="0.01" placeholder="ej. 185.40"></div>
+    </div>
+    <div class="results" id="dcfResults"></div>
+    <p class="note">Un DCF es tan bueno como sus supuestos: mové el crecimiento y la tasa de descuento un par de puntos y mirá cuánto salta el valor intrínseco. Si el resultado cambia radicalmente con supuestos razonables, la empresa es difícil de valuar con este método y conviene pesarlo menos en la decisión.</p>
+  </div>
+</section>
+
+<section id="sensitivity">
+  <h2>4. Sensibilidad del DCF</h2>
+  <p class="sub">Usa los mismos datos que cargaste arriba (FCF, acciones, crecimiento terminal) y muestra el valor intrínseco por acción variando el crecimiento anual y la tasa de descuento alrededor de tu escenario base. La celda del centro es tu escenario; si el precio actual está muy por fuera del rango, la valuación es más incierta de lo que parece con un solo número.</p>
+  <div class="card">
+    <div class="scroll-x"><table class="sens-table" id="sensTable"></table></div>
+    <p class="note">Filas: tasa de descuento (WACC). Columnas: crecimiento anual esperado. Completá la sección de DCF de arriba para ver la grilla.</p>
+  </div>
+</section>
+
+<section id="score">
+  <h2>5. Scorecard de calidad</h2>
+  <p class="sub">Un chequeo cualitativo rápido, más allá de los números — pensado para complementar, no reemplazar, los ratios de arriba.</p>
+  <div class="card">
+    <div class="check-list" id="checklist">
+      <label class="check"><input type="checkbox" data-w="1"><span class="txt"><strong>Ventaja competitiva clara</strong><span>Marca, costos, red, switching costs o escala que un competidor no puede copiar fácil.</span></span></label>
+      <label class="check"><input type="checkbox" data-w="1"><span class="txt"><strong>Management alineado</strong><span>Insiders con participación relevante, historial de asignación de capital razonable.</span></span></label>
+      <label class="check"><input type="checkbox" data-w="1"><span class="txt"><strong>Balance sólido</strong><span>Deuda manejable frente al flujo de caja, sin vencimientos que ahoguen a la empresa.</span></span></label>
+      <label class="check"><input type="checkbox" data-w="1"><span class="txt"><strong>Crecimiento de ingresos sostenido</strong><span>No solo un trimestre bueno — varios años de crecimiento real, no solo por adquisiciones.</span></span></label>
+      <label class="check"><input type="checkbox" data-w="1"><span class="txt"><strong>Márgenes estables o en expansión</strong><span>La rentabilidad no se está erosionando por competencia o presión de costos.</span></span></label>
+      <label class="check"><input type="checkbox" data-w="1"><span class="txt"><strong>Entendés cómo gana plata</strong><span>Podés explicar el modelo de negocio en dos frases, sin jerga.</span></span></label>
+      <label class="check"><input type="checkbox" data-w="1"><span class="txt"><strong>Valuación con margen de seguridad</strong><span>El precio actual deja algo de colchón frente a tu estimación de valor intrínseco.</span></span></label>
+      <label class="check"><input type="checkbox" data-w="1"><span class="txt"><strong>Riesgos identificados y aceptables</strong><span>Regulatorio, competencia, ciclo — los nombraste y decidís que son tolerables.</span></span></label>
+    </div>
+    <div class="score-bar">
+      <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+      <div class="score-label"><span id="scoreText">0 / 8</span><span id="scoreVerdict"></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="gloss">
+  <h2>6. Glosario rápido</h2>
+  <p class="sub">Para tener a mano mientras usás las calculadoras de arriba.</p>
+  <div class="gloss" id="glossary"></div>
+</section>
+
+<footer>
+  Herramienta educativa para practicar análisis fundamental. No es asesoramiento financiero ni recomendación de inversión — los números que uses son los que vos cargues.
+</footer>
+</div>
+
+<script>
+function fmt(n, d=2){ return isFinite(n) ? n.toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d}) : '—'; }
+function tag(cls, txt){ return `<span class="tag ${cls}">${txt}</span>`; }
+function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; }
+function row(name, val, tagHtml=''){ return `<div class="row"><span class="name">${name}</span><span class="val">${val}${tagHtml}</span></div>`; }
+
+function calcRatios(){
+  const price=num('price'), eps=num('eps'), bvps=num('bvps'), ni=num('ni'), eq=num('eq'),
+        debt=num('debt'), ca=num('ca'), cl=num('cl'), fcf=num('fcf'), mktcap=num('mktcap');
+  let out='';
+  if(price!==null && eps!==null && eps!==0){
+    const pe = price/eps;
+    let t = pe<0?tag('bad','negativo'):pe<15?tag('good','bajo'):pe<28?tag('warn','moderado'):tag('bad','elevado');
+    out += row('P/E (precio / ganancia)', fmt(pe)+'×', t);
+  }
+  if(price!==null && bvps!==null && bvps!==0){
+    const pb = price/bvps;
+    let t = pb<1?tag('good','bajo'):pb<4?tag('warn','moderado'):tag('bad','elevado');
+    out += row('P/B (precio / valor libro)', fmt(pb)+'×', t);
+  }
+  if(ni!==null && eq!==null && eq!==0){
+    const roe = (ni/eq)*100;
+    let t = roe<8?tag('bad','bajo'):roe<20?tag('good','sólido'):tag('warn','revisar apalancamiento');
+    out += row('ROE (retorno sobre patrimonio)', fmt(roe)+'%', t);
+  }
+  if(debt!==null && eq!==null && eq!==0){
+    const de = debt/eq;
+    let t = de<0.5?tag('good','conservador'):de<1.5?tag('warn','moderado'):tag('bad','alto');
+    out += row('Deuda / Patrimonio', fmt(de)+'×', t);
+  }
+  if(ca!==null && cl!==null && cl!==0){
+    const cr = ca/cl;
+    let t = cr<1?tag('bad','ajustado'):cr<2?tag('good','saludable'):tag('warn','muy holgado');
+    out += row('Ratio corriente', fmt(cr)+'×', t);
+  }
+  if(fcf!==null && mktcap!==null && mktcap!==0){
+    const fy = (fcf/mktcap)*100;
+    let t = fy<2?tag('bad','bajo'):fy<5?tag('warn','moderado'):tag('good','atractivo');
+    out += row('FCF Yield', fmt(fy)+'%', t);
+  }
+  document.getElementById('ratioResults').innerHTML = out || '<p class="note">Cargá al menos precio + EPS para ver el primer ratio.</p>';
+}
+
+function dcfPerShare(fcf, shares, g, term, disc){
+  if(fcf===null||shares===null||g===null||term===null||disc===null||shares===0||disc<=term) return null;
+  const gRate=g/100, tRate=term/100, dRate=disc/100;
+  let pv=0, cf=fcf;
+  for(let y=1;y<=5;y++){ cf = cf*(1+gRate); pv += cf/Math.pow(1+dRate,y); }
+  const terminalValue = (cf*(1+tRate))/(dRate-tRate);
+  const pvTerminal = terminalValue/Math.pow(1+dRate,5);
+  return (pv+pvTerminal)/shares;
+}
+
+function calcDCF(){
+  const fcf=num('dfcf'), shares=num('dshares'), g=num('dgrowth'), term=num('dterm'), disc=num('ddisc'), price=num('dprice');
+  const el = document.getElementById('dcfResults');
+  const perShare = dcfPerShare(fcf,shares,g,term,disc);
+  if(perShare===null){
+    el.innerHTML = '<p class="note">Completá todos los campos. La tasa de descuento tiene que ser mayor al crecimiento terminal.</p>';
+  } else {
+    let out = row('Valor intrínseco estimado / acción', '$'+fmt(perShare));
+    if(price!==null){
+      const diff = ((perShare-price)/price)*100;
+      let t = diff>15?tag('good','posible margen de seguridad'):diff<-15?tag('bad','posible sobrevaluación'):tag('warn','cerca del valor razonable');
+      out += row('Vs. precio actual ($'+fmt(price)+')', (diff>=0?'+':'')+fmt(diff,1)+'%', t);
+    }
+    el.innerHTML = out;
+  }
+  calcSensitivity();
+}
+
+function calcSensitivity(){
+  const fcf=num('dfcf'), shares=num('dshares'), g=num('dgrowth'), term=num('dterm'), disc=num('ddisc'), price=num('dprice');
+  const table = document.getElementById('sensTable');
+  if(fcf===null||shares===null||g===null||term===null||disc===null){
+    table.innerHTML='';
+    return;
+  }
+  const gOffsets=[-4,-2,0,2,4], dOffsets=[-2,-1,0,1,2];
+  let html = '<tr><th>WACC ↓ / Crec. →</th>' + gOffsets.map(o=>`<th>${fmt(g+o,1)}%</th>`).join('') + '</tr>';
+  dOffsets.forEach(dOff=>{
+    const dVal = disc+dOff;
+    html += `<tr><th>${fmt(dVal,1)}%</th>`;
+    gOffsets.forEach(gOff=>{
+      const gVal = g+gOff;
+      const ps = dcfPerShare(fcf,shares,gVal,term,dVal);
+      let cls = (dOff===0 && gOff===0) ? 'center' : (price!==null && ps!==null ? (ps>price?'above':'below') : '');
+      html += `<td class="${cls}">${ps!==null?'$'+fmt(ps):'—'}</td>`;
+    });
+    html += '</tr>';
+  });
+  table.innerHTML = html;
+}
+
+function calcCompare(){
+  const cols = [1,2,3].map(i=>({
+    name: document.getElementById('c'+i+'name').value || 'Empresa '+i,
+    price: num('c'+i+'price'), eps: num('c'+i+'eps'), bvps: num('c'+i+'bvps'),
+    roe: num('c'+i+'roe'), de: num('c'+i+'de')
+  })).filter(c => c.price!==null || c.eps!==null || c.roe!==null || c.de!==null);
+  const out = document.getElementById('cmpOut');
+  if(cols.length<2){ out.innerHTML=''; return; }
+  const metrics = [
+    {label:'P/E', better:'low', get:c => (c.price!==null && c.eps) ? c.price/c.eps : null, fmt:v=>fmt(v)+'×'},
+    {label:'P/B', better:'low', get:c => (c.price!==null && c.bvps) ? c.price/c.bvps : null, fmt:v=>fmt(v)+'×'},
+    {label:'ROE', better:'high', get:c => c.roe, fmt:v=>fmt(v)+'%'},
+    {label:'Deuda/Patrimonio', better:'low', get:c => c.de, fmt:v=>fmt(v)+'×'}
+  ];
+  let html = '<tr><th>Ratio</th>' + cols.map(c=>`<th>${c.name}</th>`).join('') + '</tr>';
+  metrics.forEach(m=>{
+    const vals = cols.map(c=>m.get(c));
+    const validVals = vals.filter(v=>v!==null && isFinite(v));
+    let best=null;
+    if(validVals.length>1){ best = m.better==='low' ? Math.min(...validVals) : Math.max(...validVals); }
+    html += `<tr><td>${m.label}</td>` + vals.map(v=>{
+      if(v===null||!isFinite(v)) return '<td>—</td>';
+      const isBest = best!==null && v===best;
+      return `<td class="${isBest?'best':''}">${m.fmt(v)}</td>`;
+    }).join('') + '</tr>';
+  });
+  out.innerHTML = html;
+}
+
+['price','eps','bvps','ni','eq','debt','ca','cl','fcf','mktcap'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calcRatios);
+});
+['dfcf','dshares','dgrowth','dterm','ddisc','dprice'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calcDCF);
+});
+['1','2','3'].forEach(i=>{
+  ['name','price','eps','bvps','roe','de'].forEach(f=>{
+    document.getElementById('c'+i+f).addEventListener('input', calcCompare);
+  });
+});
+
+const checks = document.querySelectorAll('#checklist input[type=checkbox]');
+function updateScore(){
+  const total = checks.length;
+  const checked = Array.from(checks).filter(c=>c.checked).length;
+  const pct = (checked/total)*100;
+  document.getElementById('scoreFill').style.width = pct+'%';
+  document.getElementById('scoreText').textContent = checked+' / '+total;
+  const verdict = document.getElementById('scoreVerdict');
+  if(checked<=2){ verdict.textContent='tesis débil'; verdict.style.color='var(--red)'; }
+  else if(checked<=5){ verdict.textContent='tesis parcial'; verdict.style.color='var(--gold)'; }
+  else { verdict.textContent='tesis sólida'; verdict.style.color='var(--green)'; }
+}
+checks.forEach(c=>c.addEventListener('change', updateScore));
+updateScore();
+
+const terms = [
+  ['P/E (Price/Earnings)','Cuántas veces la ganancia anual por acción estás pagando en el precio. Útil para comparar empresas similares, poco útil entre industrias distintas o con ganancias volátiles.'],
+  ['P/B (Price/Book)','Precio sobre el valor contable del patrimonio. Más relevante en bancos y empresas de activos tangibles; menos en negocios de activos intangibles (software, marcas).'],
+  ['ROE (Return on Equity)','Ganancia neta sobre el patrimonio. Un ROE muy alto puede reflejar un negocio excelente o simplemente mucha deuda (poco patrimonio) — siempre mirarlo junto al Deuda/Patrimonio.'],
+  ['ROIC','Retorno sobre el capital invertido total (deuda + patrimonio). Más difícil de manipular con apalancamiento que el ROE, buen complemento.'],
+  ['FCF Yield','Flujo de caja libre sobre la capitalización de mercado. Muestra cuánto efectivo genera la empresa en relación a lo que cuesta comprarla — más difícil de maquillar contablemente que la ganancia neta.'],
+  ['WACC','Costo promedio ponderado del capital: lo que le cuesta a la empresa financiarse combinando deuda y patrimonio. Se usa como tasa de descuento en un DCF.'],
+  ['Margen de seguridad','La diferencia entre el valor intrínseco estimado y el precio de mercado. Cuanto mayor el margen, más colchón hay si tu estimación resulta optimista.'],
+  ['Moat (foso competitivo)','Lo que protege las ganancias de una empresa de la competencia a largo plazo: marca, costos de cambio, efectos de red, ventajas de costo o escala regulatoria.']
+];
+document.getElementById('glossary').innerHTML = terms.map(([t,d])=>
+  `<details class="g-item"><summary>${t}</summary><p>${d}</p></details>`
+).join('');
+</script>
+</body>
+</html>
